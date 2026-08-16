@@ -1,0 +1,11 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Secrets / local config
+.env
+
+# Runtime artifacts
+output/
+logs/
