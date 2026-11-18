@@ -20,7 +20,14 @@ PLACEHOLDER_DOMAINS = {
 }
 
 #: Local parts that mark automated/placeholder addresses.
-PLACEHOLDER_PREFIXES = ("noreply", "no-reply", "donotreply", "no_reply", "mailer-daemon")
+PLACEHOLDER_PREFIXES = (
+    "noreply",
+    "no-reply",
+    "donotreply",
+    "no_reply",
+    "mailer-daemon",
+    "example",
+)
 
 
 def normalize_whitespace(value: str) -> str:

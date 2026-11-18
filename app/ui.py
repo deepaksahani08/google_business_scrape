@@ -4,9 +4,9 @@ Run with:
 
     streamlit run app/ui.py
 
-Users enter a business category and location, choose a platform (Google Maps /
-DuckDuckGo), and run the pipeline from the browser. Results are previewed in
-a table and available as a CSV download.
+Users enter a business category and location and run the Google Maps pipeline
+from the browser. Results are previewed in a table and available as a CSV
+download.
 """
 
 from __future__ import annotations
@@ -35,26 +35,14 @@ st.caption(
     "their websites for public emails, and export to CSV."
 )
 
-SOURCE_OPTIONS = ("google_maps", "duckduckgo")
-SOURCE_HELP = {
-    "google_maps": "Google Maps (browser session; no API key required).",
-    "duckduckgo": "DuckDuckGo search (name + website only).",
-}
-
 with st.form("scraper_form"):
     col1, col2 = st.columns(2)
     category = col1.text_input("Business category", value="dentist")
     location = col2.text_input("Location", value="Dallas, TX")
 
-    col3, col4, col5 = st.columns(3)
-    source = col3.selectbox(
-        "Platform",
-        SOURCE_OPTIONS,
-        index=0,
-        help=SOURCE_HELP["google_maps"],
-    )
-    google_maps_max_results = col4.slider("Max Google Maps results", 5, 200, 60)
-    concurrency = col5.slider("Concurrency", 1, 10, 5)
+    col3, col4 = st.columns(2)
+    google_maps_max_results = col3.slider("Max Google Maps results", 5, 200, 60)
+    concurrency = col4.slider("Concurrency", 1, 10, 5)
 
     run_button = st.form_submit_button("▶ Run scraper", type="primary")
 
@@ -66,7 +54,6 @@ if run_button:
     config = Config()
     config = replace(
         config,
-        search_source=source,
         concurrency=int(concurrency),
         google_maps_max_results=int(google_maps_max_results),
     )
@@ -76,8 +63,7 @@ if run_button:
     try:
         with st.status("Running the scraper...", expanded=True) as status:
             st.write(
-                f"Searching for **{category.strip()}** in **{location.strip()}** "
-                f"via *{source}*..."
+                f"Searching Google Maps for **{category.strip()}** in **{location.strip()}**..."
             )
             count = asyncio.run(
                 run(category.strip(), location.strip(), config, output_path)
@@ -109,4 +95,4 @@ if "output_path" in st.session_state:
             mime="text/csv",
         )
     else:
-        st.warning("The run produced no data (the selected platform may have blocked the scraper).")
+        st.warning("The run produced no data (Google Maps may have blocked the scraper).")

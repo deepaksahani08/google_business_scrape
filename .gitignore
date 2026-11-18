@@ -5,7 +5,9 @@ __pycache__/
 
 # Secrets / local config
 .env
+.vercel/
 
 # Runtime artifacts
 output/
 logs/
+.vercel

@@ -1,1 +1,1 @@
-"""Browser scraping layer (browser, Google Maps, DuckDuckGo)."""
+"""Browser scraping layer (browser, Google Maps)."""

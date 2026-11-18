@@ -61,9 +61,9 @@ def test_csv_columns_and_dedup():
         tmp.unlink()
     config = Config()
     exporter = CsvExporter(config, output_path=tmp)
-    exporter.write(Business(name="Alpha Dental", source="duckduckgo").to_csv_row())
-    exporter.write(Business(name="Beta Dental", source="duckduckgo").to_csv_row())
-    exporter.write(Business(name="Alpha Dental", source="duckduckgo").to_csv_row())  # dupe
+    exporter.write(Business(name="Alpha Dental", source="google_maps").to_csv_row())
+    exporter.write(Business(name="Beta Dental", source="google_maps").to_csv_row())
+    exporter.write(Business(name="Alpha Dental", source="google_maps").to_csv_row())  # dupe
     exporter.write(
         Business(name="City Dental", source="google_maps", source_url="https://gm/place/C").to_csv_row()
     )
@@ -73,7 +73,7 @@ def test_csv_columns_and_dedup():
     assert list(df.columns) == expected, list(df.columns)
     assert len(df) == 3, len(df)
     sources = set(df["Source"])
-    assert sources == {"duckduckgo", "google_maps"}, sources
+    assert sources == {"google_maps"}, sources
     print("csv exporter OK:", list(df.columns), "rows:", len(df), "sources:", sources)
     tmp.unlink()
 

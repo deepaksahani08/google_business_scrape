@@ -1,0 +1,20 @@
+FROM python:3.13-slim
+
+ENV PYTHONUNBUFFERED=1 \
+    PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
+    CONTAINER_MODE=true
+
+WORKDIR /srv
+
+COPY requirements-web.txt .
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libatomic1 \
+    && pip install --no-cache-dir -r requirements-web.txt \
+    && playwright install --with-deps --only-shell chromium \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY app ./app
+COPY public ./public
+
+EXPOSE 80
+CMD ["python", "-m", "app.web"]
