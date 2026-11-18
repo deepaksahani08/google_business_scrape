@@ -32,7 +32,7 @@ def test_parse_place_page():
         PLACE_FIXTURE, "https://www.google.com/maps/place/City+Dental"
     )
     assert business.name == "City Dental Dallas", business.name
-    assert business.phone == "(214) 555-0100", business.phone
+    assert business.phone == "+1 (214) 555-0100", business.phone
     assert business.website == "https://citydentaldallas.com/", business.website
     assert business.address == "123 Main St, Dallas, TX 75201", business.address
     assert business.source == "google_maps", business.source
