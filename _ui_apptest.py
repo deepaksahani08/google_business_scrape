@@ -1,16 +1,11 @@
-"""Temp verification: Streamlit UI renders the platform dropdown."""
+"""Temp verification: Streamlit UI renders the Google Maps controls."""
 from streamlit.testing.v1 import AppTest
 
 at = AppTest.from_file("app/ui.py", default_timeout=30)
 at.run()
 assert not at.exception, at.exception
 
-labels = [s.label for s in at.selectbox]
-assert "Platform" in labels, labels
-platform = next(s for s in at.selectbox if s.label == "Platform")
-print("Platform options:", platform.options)
-assert list(platform.options) == ["google_maps", "duckduckgo"], platform.options
-assert platform.value == "google_maps", platform.value
+assert not at.selectbox, [s.label for s in at.selectbox]
 
 slider_labels = [s.label for s in at.slider]
 print("Sliders:", slider_labels)

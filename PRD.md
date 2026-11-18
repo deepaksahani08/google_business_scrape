@@ -6,19 +6,19 @@
 
 MVP v1.3
 
-v1.1 added a Streamlit web UI and a DuckDuckGo search source.
+v1.1 added a Streamlit web UI.
 v1.2 added a Google Maps platform: Google Maps is scraped directly with the
-browser (no API key), and the UI exposes a platform dropdown.
+browser (no API key).
 v1.3 removes the Yelp platform: Yelp search, pagination, and parsing code
-are deleted and the platform dropdown is now google_maps / duckduckgo.
-Google Maps is the default source and the Google Maps result limit defaults
+are deleted.
+Google Maps is the only source and the Google Maps result limit defaults
 to 60 (UI slider allows up to 200).
 
 ---
 
 # Objective
 
-Create a lightweight Python scraper that searches Google Maps (or DuckDuckGo) using a
+Create a lightweight Python scraper that searches Google Maps using a
 business category and location, extracts business information, crawls each
 company's website for publicly available email addresses, and exports the
 results to a CSV file.
@@ -50,8 +50,6 @@ python-dotenv
 loguru
 
 Streamlit (web UI)
-
-duckduckgo-search (DuckDuckGo search source)
 
 No other libraries should be introduced unless absolutely required to fix a bug.
 
@@ -97,7 +95,6 @@ yelp-scraper/
 │   ├── scraper/
 │   │   ├── __init__.py
 │   │   ├── browser.py
-│   │   ├── duckduckgo.py
 │   │   └── google_maps.py
 │   │
 │   ├── crawler/
@@ -171,9 +168,9 @@ Website URL
 
 Business Address
 
-Source URL (Google Maps place URL; DuckDuckGo result URL)
+Source URL (Google Maps place URL)
 
-Source (google_maps / duckduckgo)
+Source (google_maps)
 
 ---
 
@@ -223,20 +220,6 @@ localhost
 
 ---
 
-## DuckDuckGo Source (optional)
-
-DuckDuckGo is available as an explicit search source.
-
-Collect from DuckDuckGo results:
-
-Business Name
-
-Website URL
-
-Source URL, Phone, and Address are left empty for DuckDuckGo-sourced results.
-
----
-
 ## Web UI (Streamlit)
 
 Streamlit app at `app/ui.py` (run with `streamlit run app/ui.py`).
@@ -246,8 +229,6 @@ Inputs:
 Business Category
 
 Location
-
-Platform (google_maps / duckduckgo)
 
 Run the scraper from the UI.
 
@@ -318,18 +299,6 @@ Company website request timeout in seconds (default 15)
 REQUEST_DELAY_SEC
 
 Politeness delay between website requests in seconds (default 1.0)
-
-SEARCH_SOURCE
-
-Search source: google_maps or duckduckgo (default google_maps)
-
-DDG_MAX_RESULTS
-
-Maximum number of DuckDuckGo results (default 15)
-
-DDG_REGION
-
-DuckDuckGo region code (default us-en)
 
 GOOGLE_MAPS_MAX_RESULTS
 
@@ -419,23 +388,19 @@ Phase 10 (v1.1)
 
 Web UI (Streamlit)
 
-DuckDuckGo search source
-
 ---
 
 Phase 11 (v1.2)
 
 Google Maps platform (direct browser scraping, no API key)
 
-Platform dropdown
-
 ---
 
 Phase 12 (v1.3)
 
-Remove Yelp platform (code and dropdown)
+Remove Yelp platform
 
-Google Maps is the default source
+Google Maps is the only source
 
 Google Maps result limit default 60, UI slider up to 200
 
@@ -467,6 +432,6 @@ Source URL
 
 No databases or additional integrations are included in MVP v1.3.
 
-MVP v1.3 provides a Streamlit web UI, a DuckDuckGo search source, and a
+MVP v1.3 provides a Streamlit web UI and a
 Google Maps platform (direct browser scraping, no API key). The Yelp
 platform has been removed.

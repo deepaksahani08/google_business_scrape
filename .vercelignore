@@ -1,0 +1,11 @@
+# Local-only files. The container installs requirements-web.txt instead.
+/requirements.txt
+.venv
+output
+logs
+_*.py
+PRD.md
+memory.md
+app/main.py
+app/ui.py
+app/exporter

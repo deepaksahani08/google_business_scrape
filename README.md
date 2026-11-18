@@ -1,6 +1,6 @@
 # Business Scraper
 
-A Python scraper that searches Google Maps or DuckDuckGo by business category
+A Python scraper that searches Google Maps by business category
 and location, visits each company website to look for public email addresses,
 and exports the results to a CSV file.
 
@@ -70,10 +70,9 @@ by itself, paste that address into your browser.
 
 1. Enter a **Business category**, such as `dentist`.
 2. Enter a **Location**, such as `Dallas, TX`.
-3. Choose a **Platform**: `google_maps` or `duckduckgo`.
-4. Set **Max Google Maps results** (5 to 200) and **Concurrency** (1 to 10).
-5. Click **Run scraper**.
-6. When the run finishes, review the table and click **Download CSV**.
+3. Set **Max Google Maps results** (5 to 200) and **Concurrency** (1 to 10).
+4. Click **Run scraper**.
+5. When the run finishes, review the table and click **Download CSV**.
 
 Press `Ctrl+C` in the terminal to stop the app.
 
@@ -89,17 +88,38 @@ The category and location are required. These options are available:
 | --- | --- | --- |
 | `--output <path>` | CSV file to write to | `output/results.csv` |
 | `--concurrency <n>` | Number of businesses processed at the same time | `5` |
-| `--source <name>` | `google_maps` or `duckduckgo` | `google_maps` |
 
-Examples:
+Example:
 
 ```powershell
-# Search DuckDuckGo instead of Google Maps
-.venv\Scripts\python.exe -m app.main "plumber" "Austin, TX" --source duckduckgo
-
 # Save to a specific file and process 3 businesses at a time
 .venv\Scripts\python.exe -m app.main "dentist" "Dallas, TX" --output output/dentists.csv --concurrency 3
 ```
+
+## Deploy to Vercel
+
+The Vercel version runs the Google Maps scraper and Chromium in a container
+(`Dockerfile.vercel`). It works differently from the local app:
+
+- Each search returns up to 50 businesses and stops after about 4 minutes.
+- Each server instance runs one search at a time.
+- Results are downloaded from the page and are not saved on the server.
+- Google Maps may block searches from cloud servers.
+
+Log in and create a preview deployment:
+
+```powershell
+npx vercel login
+npx vercel
+```
+
+When the preview works, publish it to production:
+
+```powershell
+npx vercel --prod
+```
+
+The deployed page is public, so anyone with the link can run searches.
 
 ## Configuration (optional)
 
@@ -114,10 +134,7 @@ LOG_LEVEL=DEBUG
 
 | Setting | Description | Default |
 | --- | --- | --- |
-| `SEARCH_SOURCE` | `google_maps` or `duckduckgo` | `google_maps` |
 | `GOOGLE_MAPS_MAX_RESULTS` | Maximum Google Maps results | `60` |
-| `DDG_MAX_RESULTS` | Maximum DuckDuckGo results | `15` |
-| `DDG_REGION` | DuckDuckGo search region | `us-en` |
 | `CONCURRENCY` | Number of businesses processed at the same time | `5` |
 | `HEADLESS` | `true` hides the browser window, `false` shows it | `true` |
 | `USER_AGENT` | Browser user agent | Chrome on Windows |
@@ -138,7 +155,6 @@ CSV files contain these columns:
 - The web interface creates a new file for each run: `output/results_<timestamp>.csv`.
 - The command line adds rows to `output/results.csv`, so results from earlier
   runs stay in the file. Use `--output` to keep a run separate.
-- DuckDuckGo results include only the company name, website, and any emails found.
 - Logs are saved in the `logs` folder and kept for 7 days.
 
 ## Troubleshooting
@@ -150,7 +166,6 @@ CSV files contain these columns:
 | `No module named streamlit` or another missing module | Repeat installation steps 2 and 3, and start the app with `.venv\Scripts\python.exe`. |
 | Port 8501 is already in use | Add `--server.port 8502` to the Streamlit command, then open <http://localhost:8502>. |
 | Google Maps returns no results | Google may be showing a consent or bot check. Set `HEADLESS=false` to watch the browser, or try again later. |
-| DuckDuckGo returns no results | DuckDuckGo may be limiting automated searches. Try again later or use Google Maps. |
 
 ## Project structure
 
@@ -160,7 +175,7 @@ app/
 ├── ui.py         Streamlit web interface
 ├── config.py     Settings loaded from .env
 ├── schemas.py    Business data model
-├── scraper/      Google Maps, DuckDuckGo, and browser code
+├── scraper/      Google Maps and browser code
 ├── crawler/      Website crawling and email extraction
 ├── exporter/     CSV export
 └── utils/        Logging, retries, URLs, and helpers

@@ -4,11 +4,11 @@
 
 ## Project Name
 
-Business Scraper (Google Maps / DuckDuckGo)
+Business Scraper (Google Maps)
 
 ## Status
 
-Implementation Complete (all phases + v1.3: Yelp platform removed, Google Maps default)
+Implementation Complete (all phases + v1.3: Yelp platform removed, Google Maps only)
 
 Offline smoke tests: PASS
 
@@ -23,11 +23,6 @@ networks; the scraper detects a missing results feed and stops gracefully.
 URL building, place-link extraction, and place-page parsing are unit-tested
 offline.
 
-Live DuckDuckGo validation: limited. The `duckduckgo-search` API returns
-0 results from the current environment (likely anti-bot throttling); the
-DuckDuckGo result parsing/filtering is unit-tested offline. The pipeline
-handles empty DuckDuckGo results gracefully (0 rows, clear log message).
-
 ## Known Limitations
 
 * The Yelp platform was removed in v1.3; the scraper no longer depends on
@@ -36,12 +31,10 @@ handles empty DuckDuckGo results gracefully (0 rows, clear log message).
   paths plus a few links found on the homepage.
 * Google Maps can also serve anti-bot/CAPTCHA or consent pages to automated
   browsers; the pipeline stops gracefully when the results feed is missing.
-* DuckDuckGo can also throttle/block automated search (0 results observed
-  in the current environment); the pipeline handles this gracefully.
 
 ## Goal
 
-Build an MVP scraper for Google Maps and DuckDuckGo that collects business information and public email addresses from company websites.
+Build an MVP scraper for Google Maps that collects business information and public email addresses from company websites.
 
 ## Frozen Tech Stack
 
@@ -56,7 +49,6 @@ Build an MVP scraper for Google Maps and DuckDuckGo that collects business infor
 * python-dotenv
 * loguru
 * Streamlit (web UI)
-* duckduckgo-search (DuckDuckGo search source)
 
 Do not replace these technologies unless fixing a blocking bug.
 
@@ -76,7 +68,6 @@ yelp-scraper/
 │   ├── scraper/
 │   │   ├── __init__.py
 │   │   ├── browser.py
-│   │   ├── duckduckgo.py
 │   │   └── google_maps.py
 │   │
 │   ├── crawler/
@@ -132,7 +123,6 @@ Included
 * Contact Page Discovery
 * Email Extraction
 * CSV Export
-* DuckDuckGo Search
 * Web UI (Streamlit)
 
 Excluded
@@ -170,9 +160,9 @@ Excluded
 
 10. End-to-End Testing
 
-11. (v1.1) Web UI and DuckDuckGo Search
-12. (v1.2) Google Maps Platform and Platform Dropdown
-13. (v1.3) Remove Yelp Platform; Google Maps is the default source; Google Maps result limit default 60, UI slider up to 200
+11. (v1.1) Web UI
+12. (v1.2) Google Maps Platform
+13. (v1.3) Remove Yelp Platform; Google Maps is the only source; Google Maps result limit default 60, UI slider up to 200
 
 Never skip phases.
 

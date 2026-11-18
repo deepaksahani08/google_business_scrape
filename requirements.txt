@@ -6,4 +6,3 @@ tenacity
 python-dotenv
 loguru
 streamlit
-duckduckgo-search

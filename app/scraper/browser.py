@@ -29,12 +29,12 @@ class BrowserSession:
 
     async def __aenter__(self) -> "BrowserSession":
         self._playwright = await async_playwright().start()
+        args = ["--disable-blink-features=AutomationControlled", "--disable-infobars"]
+        if self.config.container_mode:
+            args += ["--no-sandbox", "--disable-dev-shm-usage"]
         self._browser = await self._playwright.chromium.launch(
             headless=self.config.headless,
-            args=[
-                "--disable-blink-features=AutomationControlled",
-                "--disable-infobars",
-            ],
+            args=args,
         )
         self._context = await self._browser.new_context(
             user_agent=self.config.user_agent,

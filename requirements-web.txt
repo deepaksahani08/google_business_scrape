@@ -1,0 +1,6 @@
+playwright==1.65.2
+httpx
+selectolax<1
+tenacity
+python-dotenv
+loguru

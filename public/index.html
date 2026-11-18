@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Business Scraper</title>
+<meta name="description" content="Find businesses on Google Maps and collect their phone numbers, addresses, and public emails.">
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f6f7f9;
+    --surface: #ffffff;
+    --text: #18202b;
+    --muted: #5b6675;
+    --border: #d9dee6;
+    --accent: #1f5fd0;
+    --accent-text: #ffffff;
+    --error-bg: #fdecec;
+    --error-text: #a12020;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #11151b;
+      --surface: #1a2029;
+      --text: #e8ecf2;
+      --muted: #a3aebd;
+      --border: #303a47;
+      --accent: #7fa9f5;
+      --accent-text: #0e1420;
+      --error-bg: #3a1c1f;
+      --error-text: #ffb4b4;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 1040px; margin: 0 auto; padding: 40px 16px 64px; }
+  h1 { margin: 0 0 4px; font-size: 1.75rem; line-height: 1.2; }
+  .intro { margin: 0 0 24px; color: var(--muted); }
+  form, .results {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+  }
+  .fields { display: grid; grid-template-columns: 1fr 1fr 140px; gap: 16px; }
+  label { display: block; margin-bottom: 4px; font-size: .875rem; font-weight: 600; }
+  input {
+    width: 100%;
+    min-height: 44px;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg);
+    color: var(--text);
+    font: inherit;
+  }
+  button {
+    min-height: 44px;
+    padding: 8px 20px;
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    background: var(--accent);
+    color: var(--accent-text);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button:disabled { opacity: .6; cursor: progress; }
+  button.secondary { background: transparent; color: var(--accent); }
+  input:focus-visible, button:focus-visible, a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .actions { display: flex; align-items: center; gap: 16px; margin-top: 16px; flex-wrap: wrap; }
+  .hint { margin: 0; color: var(--muted); font-size: .875rem; }
+  #status { margin: 16px 0; min-height: 24px; }
+  #status.error {
+    padding: 10px 12px;
+    border-radius: 6px;
+    background: var(--error-bg);
+    color: var(--error-text);
+  }
+  .results-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  h2 { margin: 0; font-size: 1.125rem; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: .9375rem; }
+  th, td {
+    padding: 10px 12px 10px 0;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+  }
+  th { font-size: .8125rem; color: var(--muted); white-space: nowrap; }
+  td { min-width: 180px; overflow-wrap: anywhere; }
+  a { color: var(--accent); }
+  [hidden] { display: none; }
+  @media (max-width: 640px) {
+    main { padding-top: 24px; }
+    .fields { grid-template-columns: 1fr; }
+    .actions button { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>Business Scraper</h1>
+  <p class="intro">Find businesses on Google Maps and collect their phone numbers, addresses, and public emails.</p>
+
+  <form id="form">
+    <div class="fields">
+      <div>
+        <label for="category">Business category</label>
+        <input id="category" name="category" value="dentist" maxlength="100" required autocomplete="off">
+      </div>
+      <div>
+        <label for="location">Location</label>
+        <input id="location" name="location" value="Dallas, TX" maxlength="100" required autocomplete="off">
+      </div>
+      <div>
+        <label for="max">Max results</label>
+        <input id="max" name="max" type="number" min="1" max="50" value="20" required>
+      </div>
+    </div>
+    <div class="actions">
+      <button id="run" type="submit">Run scraper</button>
+      <p class="hint">A search can take up to 4 minutes. Keep this page open.</p>
+    </div>
+  </form>
+
+  <div id="status" role="status" aria-live="polite"></div>
+
+  <section class="results" id="results" hidden>
+    <div class="results-head">
+      <h2 id="summary"></h2>
+      <button class="secondary" id="download" type="button">Download CSV</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th scope="col">Company</th><th scope="col">Phone</th><th scope="col">Website</th><th scope="col">Email</th><th scope="col">Address</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script>
+  const COLUMNS = ["Company Name", "Phone", "Website", "Email", "Address", "Source", "Source URL"];
+  const $ = (id) => document.getElementById(id);
+  let rows = [];
+
+  function setStatus(message, isError = false) {
+    $("status").textContent = message;
+    $("status").className = isError ? "error" : "";
+  }
+
+  function safeUrl(value) {
+    try {
+      const url = new URL(value);
+      return ["http:", "https:"].includes(url.protocol) ? url.href : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function addCell(row, value, href) {
+    const cell = row.insertCell();
+    if (href) {
+      const link = document.createElement("a");
+      link.href = href;
+      link.textContent = value;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      cell.append(link);
+    } else {
+      cell.textContent = value || "None found";
+    }
+  }
+
+  function render(data) {
+    rows = data.results;
+    $("rows").replaceChildren();
+    for (const item of rows) {
+      const row = $("rows").insertRow();
+      addCell(row, item["Company Name"], safeUrl(item["Source URL"]));
+      addCell(row, item["Phone"]);
+      addCell(row, item["Website"], safeUrl(item["Website"]));
+      addCell(row, item["Email"]);
+      addCell(row, item["Address"]);
+    }
+    const withEmail = rows.filter((item) => item["Email"]).length;
+    $("summary").textContent = `${rows.length} businesses, ${withEmail} with email`;
+    $("results").hidden = rows.length === 0;
+  }
+
+  function csvCell(value) {
+    let text = String(value ?? "");
+    if (/^[=+\-@\t\r]/.test(text)) text = `'${text}`;
+    return `"${text.replaceAll('"', '""')}"`;
+  }
+
+  function downloadCsv() {
+    const lines = [COLUMNS, ...rows.map((item) => COLUMNS.map((column) => item[column]))];
+    const csv = lines.map((line) => line.map(csvCell).join(",")).join("\r\n");
+    const url = URL.createObjectURL(new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "business-results.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function runScrape(event) {
+    event.preventDefault();
+    $("run").disabled = true;
+    $("results").hidden = true;
+    setStatus("Searching Google Maps and checking websites...");
+    try {
+      const response = await fetch("/api/scrape", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          category: $("category").value,
+          location: $("location").value,
+          max_results: Number($("max").value),
+        }),
+      });
+      const data = await response.json().catch(() => null);
+      if (!response.ok || !data) {
+        throw new Error(data?.error || "The search did not finish. Please try again.");
+      }
+      render(data);
+      if (data.count === 0) {
+        setStatus("No businesses found. Google Maps may have blocked this search, so try again in a few minutes.");
+      } else if (data.unfinished > 0) {
+        setStatus(`Time ran out before ${data.unfinished} websites were fully checked.`);
+      } else {
+        setStatus("");
+      }
+    } catch (error) {
+      const offline = error instanceof TypeError;
+      setStatus(offline ? "Could not reach the server. Check your connection and try again." : error.message, true);
+    } finally {
+      $("run").disabled = false;
+    }
+  }
+
+  $("form").addEventListener("submit", runScrape);
+  $("download").addEventListener("click", downloadCsv);
+</script>
+</body>
+</html>
