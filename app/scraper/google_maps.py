@@ -22,7 +22,7 @@ from selectolax.parser import HTMLParser
 from app.config import Config
 from app.schemas import Business
 from app.scraper.browser import BrowserSession
-from app.utils.helpers import dedupe_preserve_order, normalize_whitespace
+from app.utils.helpers import dedupe_preserve_order, format_us_phone, normalize_whitespace
 
 GOOGLE_MAPS_SEARCH_URL = "https://www.google.com/maps/search/{}"
 
@@ -115,7 +115,7 @@ def parse_place_page(html: str, place_url: str) -> Business:
 
     phone_node = tree.css_first("button[data-item-id^='phone:tel:']")
     if phone_node:
-        business.phone = _clean_text(phone_node.text(strip=True))
+        business.phone = format_us_phone(_clean_text(phone_node.text(strip=True)), business.address)
 
     site_node = tree.css_first("a[data-item-id='authority']")
     if site_node:

@@ -206,7 +206,8 @@
 
   function csvCell(value) {
     let text = String(value ?? "");
-    if (/^[=+\-@\t\r]/.test(text)) text = `'${text}`;
+    const isPhone = /^\+[\d\s().-]+$/.test(text);
+    if (!isPhone && /^[=+\-@\t\r]/.test(text)) text = `'${text}`;
     return `"${text.replaceAll('"', '""')}"`;
   }
 
